@@ -1,13 +1,10 @@
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({ view: "student" }, () => {
-    console.log("Default view set to student.");
-  });
-});
+
 
 // background.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'fetchClassData') {
-      fetch('https://script.google.com/a/macros/vsa.edu.hk/s/AKfycbyagcoynMcHhZpSZSyEJ5hfDzt4ReGqYh48IBgDsLWTPCzIShd8MYVanJo-jnFLYYPFgw/exec')
+      console.log("I'm running in the background!");
+      fetch('https://script.google.com/macros/s/AKfycbw2H6RBZMnwSroa5MviM9Q7XiAK4gYbwsSZMecRiGqYbQgRXK3M8E8-F_vnkhayXJOmtQ/exec')
         .then(response => response.json())
         .then(data => {
           // Store the fetched data in the extension's storage

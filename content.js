@@ -1,33 +1,62 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const classSelect = document.getElementById('staff_class_list');
+console.log("I'm running 1!");
+var mbresponse;
+
+if (document.readyState !== 'loading') {
+  console.log('document is already ready, just execute code here');
+  getData();
+} else {
+  document.addEventListener('DOMContentLoaded', async () => {
+    getData();
+  });
+}
+
+async function getData(){
+
+  const classSelect = document.getElementById('staff_class_list');
     if (!classSelect) return;
     
     // Get the selected class ID
     const vsaClassId = classSelect.value;
-  
+    console.log("I'm running 2!");
     // Fetch data from the Google Apps Script API
-    const response = await fetch(`https://script.google.com/a/macros/vsa.edu.hk/s/AKfycbyagcoynMcHhZpSZSyEJ5hfDzt4ReGqYh48IBgDsLWTPCzIShd8MYVanJo-jnFLYYPFgw/exec?vsa_class_id=${vsaClassId}`);
-    const data = await response.json();
+    //var response = await fetch(`https://script.google.com/a/macros/vsa.edu.hk/s/AKfycbyagcoynMcHhZpSZSyEJ5hfDzt4ReGqYh48IBgDsLWTPCzIShd8MYVanJo-jnFLYYPFgw/exec?vsa_class_id=${vsaClassId}`);
+    chrome.runtime.sendMessage({ action: 'fetchClassData', vsaClassId: vsaClassId }, (res) => {
+      if (res.data) {
+        // Update the DOM with the fetched data
+        mbresponse = res.data;
+        console.log(mbresponse);
+        var data = mbresponse;
+        if (data.error) {
+          console.error(data.error);
+          return;
+        }
+        startViz(data);
+            
+      } else if (res.error) {
+        classDataElement.textContent = `Error: ${res.error}`;
+      }
+    });
+}
+
+   
   
-    if (data.error) {
-      console.error(data.error);
-      return;
-    }
-  
+function startViz(data){  
     // Inject Chart.js dynamically
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    script.src = chrome.runtime.getURL('chart.js');
     script.onload = () => {
       // Visualize the data after Chart.js is loaded
       visualizeData(data);
     };
     document.head.appendChild(script);
-  });
+  }
   
   function visualizeData(data) {
     console.log(data);
     data.forEach(student => {
       const studentDiv = document.getElementById(`auto_calcaluted_subj_score_${student.vsa_student_id}`);
+      console.log(student.vsa_student_id);
+      console.log(studentDiv);
       if (studentDiv) {
         const graphDiv = document.createElement('div');
         graphDiv.id = `graph_${student.vsa_student_id}`;
@@ -102,3 +131,5 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
+
+ 
