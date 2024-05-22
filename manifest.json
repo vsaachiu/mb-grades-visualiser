@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Gradebook Visualization",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://portal.vsa.edu.hk/myportal/staff/reports/edit/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "128": "images/icon128.png"
+    }
+  }
+}
