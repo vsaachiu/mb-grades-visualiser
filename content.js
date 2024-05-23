@@ -1,4 +1,4 @@
-console.log("I'm running 1!");
+console.log("MBGV running!");
 var mbresponse;
 
 if (document.readyState !== 'loading') {
@@ -17,21 +17,19 @@ async function getData(){
     
     // Get the selected class ID
     const vsaClassId = classSelect.value;
-    console.log("I'm running 2!");
-    // Fetch data from the Google Apps Script API
-    //var response = await fetch(`https://script.google.com/a/macros/vsa.edu.hk/s/AKfycbyagcoynMcHhZpSZSyEJ5hfDzt4ReGqYh48IBgDsLWTPCzIShd8MYVanJo-jnFLYYPFgw/exec?vsa_class_id=${vsaClassId}`);
+    console.log(`MBGV running with Class ID: ${vsaClassId}`);
+    // Fetch data from the Google Apps Script API through background worker
     chrome.runtime.sendMessage({ action: 'fetchClassData', vsaClassId: vsaClassId }, (res) => {
       if (res.data) {
         // Update the DOM with the fetched data
         mbresponse = res.data;
-        console.log(mbresponse);
+        //console.log(mbresponse);
         var data = mbresponse;
         if (data.error) {
           console.error(data.error);
-          return;
-        }
-        startViz(data);
-            
+        } else {
+          startViz(data);
+        }                
       } else if (res.error) {
         classDataElement.textContent = `Error: ${res.error}`;
       }
@@ -42,13 +40,13 @@ async function getData(){
   
 function startViz(data){  
     // Inject Chart.js dynamically
-    const script = document.createElement('script');
-    script.src = chrome.runtime.getURL('chart.js');
-    script.onload = () => {
+    //const script = document.createElement('script');
+   // script.src = chrome.runtime.getURL('chart.js');
+   // script.onload = () => {
       // Visualize the data after Chart.js is loaded
       visualizeData(data);
-    };
-    document.head.appendChild(script);
+   // };
+    //document.head.appendChild(script);
   }
   
   function visualizeData(data) {
@@ -63,15 +61,13 @@ function startViz(data){
         studentDiv.parentNode.insertBefore(graphDiv, studentDiv.nextSibling);
   
         const canvas = document.createElement('canvas');
+        
         graphDiv.appendChild(canvas);
   
         // Filter tasks that have criterion_grades data
         const tasksWithGrades = student.tasks.filter(task => task.criterion_grades);
   
-        // Prepare data for the chart
-        const labels = [];
-        const datasets = [];
-  
+        
         // Assign a unique color for each task
         const colors = [
           'rgba(75, 192, 192, 0.2)',
@@ -89,8 +85,33 @@ function startViz(data){
           'rgba(153, 102, 255, 1)',
           'rgba(255, 159, 64, 1)'
         ];
+        // Prepare data for the chart
+          const labels = ['A', 'B', 'C', 'D'];
+          const datasets = [];
+
+          tasksWithGrades.forEach((task, taskIndex) => {
+            const taskDataset = {
+              label: task.task_name,
+              data: [0, 0, 0, 0], // Initialize data with 0s for each label
+              backgroundColor: colors[taskIndex % colors.length],
+              borderColor: borderColors[taskIndex % borderColors.length],
+              borderWidth: 1
+            };
+
+            task.criterion_grades.forEach(grade => {
+              const labelIndex = labels.indexOf(grade.label);
+              taskDataset.data[labelIndex] = grade.score;
+            });
+
+            datasets.push(taskDataset);
+          });
+
   
-        tasksWithGrades.forEach((task, index) => {
+       /* // Prepare data for the chart
+           const labels = [];
+          const datasets = [];
+          
+         tasksWithGrades.forEach((task, index) => {
           task.criterion_grades.forEach(grade => {
             const label = `${task.task_name} (${grade.label})`;
             labels.push(label);
@@ -103,7 +124,7 @@ function startViz(data){
             });
           });
         });
-  
+  */
         new Chart(canvas, {
           type: 'bar',
           data: {
@@ -113,7 +134,8 @@ function startViz(data){
           options: {
             scales: {
               y: {
-                beginAtZero: true
+                beginAtZero: true,
+                max: 8
               }
             },
             plugins: {
@@ -126,6 +148,7 @@ function startViz(data){
                 }
               }
             }
+
           }
         });
       }

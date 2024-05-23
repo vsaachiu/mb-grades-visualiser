@@ -13,7 +13,7 @@
   "content_scripts": [
     {
       "matches": ["*://portal.vsa.edu.hk/myportal/staff/reports/edit/*"],
-      "js": ["content.js"]
+      "js": ["content.js", "chart.js"]
     }
   ],
   "web_accessible_resources": [
