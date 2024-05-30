@@ -1,14 +1,37 @@
 console.log("MBGV running!");
 var mbresponse;
 
+
+function loadListener(){
+  const classSelect = document.getElementById('staff_class_list');
+  if (classSelect){
+    console.log("dropdown found, loading data.")
+    classSelect.addEventListener('change', () => {
+      getData();
+    });
+    getData();
+  } else {
+    window.setTimeout(loadListener, 2000); //Wait 2 seconds and call this function again.
+    console.log("dropdown not found, waiting 2 secs")
+  }
+}
+/*
 if (document.readyState !== 'loading') {
   console.log('document is already ready, just execute code here');
   getData();
+  const classSelect = document.getElementById('staff_class_list');
+
 } else {
   document.addEventListener('DOMContentLoaded', async () => {
     getData();
   });
+  const classSelect = document.getElementById('staff_class_list');
+  classSelect.addEventListener('change', () => {
+    getData();
+  });
 }
+*/
+loadListener();
 
 async function getData(){
 
@@ -61,7 +84,9 @@ function startViz(data){
         studentDiv.parentNode.insertBefore(graphDiv, studentDiv.nextSibling);
   
         const canvas = document.createElement('canvas');
-        
+        canvas.classList.add('mb_chart');
+        canvas.setAttribute("height","400px");
+        canvas.setAttribute("width","800px");
         graphDiv.appendChild(canvas);
   
         // Filter tasks that have criterion_grades data
@@ -147,7 +172,11 @@ function startViz(data){
                   }
                 }
               }
-            }
+            },
+            responsive: false, // Set this to false to use a fixed height
+            maintainAspectRatio: false, // Add this to allow the chart to be resized
+            height: 400, // Set the height of the chart
+            width: 800 // Set the width of the chart
 
           }
         });
